@@ -2,15 +2,15 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Deploy resources for audio pipeline project
 
 Parameters:
-  # LambdaFunctionNameBeta:
-  #   Type: String
-  #   Default: Audio-Pipeline-Lambda-Beta
-  #   Description: Name for the Lambda function
+  LambdaFunctionNameBeta:
+    Type: String
+    Default: Audio-Pipeline-Lambda-Beta
+    Description: Name for the Lambda function
 
-  # LambdaFunctionNameProd:
-  #   Type: String
-  #   Default: Audio-Pipeline-Lambda-Prod
-  #   Description: Name for the Lambda function
+  LambdaFunctionNameProd:
+    Type: String
+    Default: Audio-Pipeline-Lambda-Prod
+    Description: Name for the Lambda function
 
   LambdaCodeBucket:
     Type: String
@@ -34,9 +34,9 @@ Resources:
                     Rules:
                       - Name: prefix
                         Value: audio-inputs/beta/
-                Function: !GetAtt LambdaFunctionBeta.Arn
+                Function: !ImportValue AudioPipeline-LambdaBetaArn
               - Event: s3:ObjectCreated:*
-                Function: !GetAtt LambdaFunctionProd.Arn
+                Function: !ImportValue AudioPipeline-LambdaProdArn
                 Filter:
                   S3Key:
                     Rules:
@@ -47,7 +47,7 @@ Resources:
   LambdaInvokePermissionBeta:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !Ref LambdaFunctionBeta
+      FunctionName: !ImportValue AudioPipeline-LambdaBetaArn
       Action: lambda:InvokeFunction
       Principal: s3.amazonaws.com
       SourceArn: !GetAtt S3Bucket.Arn
@@ -55,7 +55,7 @@ Resources:
   LambdaInvokePermissionProd:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !Ref LambdaFunctionProd
+      FunctionName: !ImportValue AudioPipeline-LambdaProdArn
       Action: lambda:InvokeFunction
       Principal: s3.amazonaws.com
       SourceArn: !GetAtt S3Bucket.Arn

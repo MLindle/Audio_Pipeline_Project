@@ -110,3 +110,11 @@ Resources:
       Code:
         S3Bucket: !Ref LambdaCodeBucket
         S3Key: !Ref LambdaCodeKey
+
+Outputs:
+  AudioPipelineLambdaBetaArn:
+    Value: !GetAtt LambdaFunctionBeta.Arn
+    Export: { Name: AudioPipeline-LambdaBetaArn }
+  AudioPipelineLambdaProdArn:
+    Value: !GetAtt LambdaFunctionProd.Arn
+    Export: { Name: AudioPipeline-LambdaProdArn }
