@@ -34,3 +34,15 @@ jobs:
         run: |
           zip function.zip process_audio.py
           aws s3 cp function.zip s3://$S3_BUCKET/$S3_PATH/function.zip
+
+      - name: Deploy Lambda Function stack
+        run: |
+            aws cloudformation deploy \
+            --stack-name ${{ secrets.CF_STACK_NAME_AUDIO_PIPELINE_2 }} \
+            --template-file infrastructure/cloudformation/LambdaFunctions.yml \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides \
+                LambdaCodeBucket=${{ secrets.S3_CODE_BUCKET_BETA }} \
+                LambdaCodeKey=${{ secrets.S3_PATH_BETA }}/function.zip \
+                LambdaFunctionNameProd=${{ secrets.LAMBDA_NAME_PROD }} \
+                LambdaFunctionNameBeta=${{ secrets.LAMBDA_NAME_BETA }}
