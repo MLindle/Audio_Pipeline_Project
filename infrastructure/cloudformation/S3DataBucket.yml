@@ -45,7 +45,7 @@ Resources:
               - s3:ListBucket
             Resource:
               - !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}"
-              - !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}/audio-inputs/*"
+              - !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}/audio_inputs/*"
             Condition:
               StringEquals:
                 aws:SourceAccount: !Ref AWS::AccountId
