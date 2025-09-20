@@ -71,21 +71,21 @@ Resources:
               - logs:PutLogEvents
             Resource: "arn:aws:logs:*:*:*"
 
-  # LambdaInvokePermissionBeta:
-  #   Type: AWS::Lambda::Permission
-  #   Properties:
-  #     FunctionName: !Ref LambdaFunctionBeta
-  #     Action: lambda:InvokeFunction
-  #     Principal: s3.amazonaws.com
-  #     SourceArn: !GetAtt S3Bucket.Arn
+  LambdaInvokePermissionBeta:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaFunctionBeta
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
 
-  # LambdaInvokePermissionProd:
-  #   Type: AWS::Lambda::Permission
-  #   Properties:
-  #     FunctionName: !Ref LambdaFunctionProd
-  #     Action: lambda:InvokeFunction
-  #     Principal: s3.amazonaws.com
-  #     SourceArn: !GetAtt S3Bucket.Arn
+  LambdaInvokePermissionProd:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaFunctionProd
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
 
   LambdaFunctionBeta:
     Type: AWS::Lambda::Function

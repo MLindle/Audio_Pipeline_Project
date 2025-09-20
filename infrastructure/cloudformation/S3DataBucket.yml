@@ -28,20 +28,3 @@ Resources:
                 Rules:
                   - Name: prefix
                     Value: audio-inputs/prod/
-
-
-  LambdaInvokePermissionBeta:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !ImportValue AudioPipeline-LambdaBetaArn
-      Action: lambda:InvokeFunction
-      Principal: s3.amazonaws.com
-      SourceArn: !GetAtt S3Bucket.Arn
-
-  LambdaInvokePermissionProd:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !ImportValue AudioPipeline-LambdaProdArn
-      Action: lambda:InvokeFunction
-      Principal: s3.amazonaws.com
-      SourceArn: !GetAtt S3Bucket.Arn
