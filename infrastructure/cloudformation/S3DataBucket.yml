@@ -45,7 +45,7 @@ Resources:
               - s3:ListBucket
             Resource:
               - !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}"
-              - !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}/audio_inputs/*"
+              - !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}/beta/audio_inputs/*"
             Condition:
               StringEquals:
                 aws:SourceAccount: !Ref AWS::AccountId
@@ -54,7 +54,7 @@ Resources:
             Effect: Allow
             Principal: { Service: transcribe.amazonaws.com }
             Action: s3:PutObject
-            Resource: !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}/audio-outputs/*"
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}/beta/audio_inputs/*"
             Condition:
               StringEquals:
                 aws:SourceAccount: !Ref AWS::AccountId
