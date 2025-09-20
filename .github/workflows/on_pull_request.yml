@@ -46,3 +46,12 @@ jobs:
                 LambdaCodeKey=${{ secrets.S3_PATH_BETA }}/function.zip \
                 LambdaFunctionNameProd=${{ secrets.LAMBDA_NAME_PROD }} \
                 LambdaFunctionNameBeta=${{ secrets.LAMBDA_NAME_BETA }}
+
+      - name: Deploy S3 Data Bucket stack
+        run: |
+            aws cloudformation deploy \
+            --stack-name ${{ secrets.CF_STACK_NAME_AUDIO_PIPELINE_3 }} \
+            --template-file infrastructure/cloudformation/S3DataBucket.yml \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides \
+                LambdaCodeBucket=${{ secrets.S3_BUCKET_BETA }}
