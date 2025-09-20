@@ -77,7 +77,7 @@ Resources:
       FunctionName: !Ref LambdaFunctionBeta
       Action: lambda:InvokeFunction
       Principal: s3.amazonaws.com
-      SourceArn: !GetAtt S3Bucket.Arn
+      SourceArn: !Ref LambdaCodeBucket
 
   LambdaInvokePermissionProd:
     Type: AWS::Lambda::Permission
@@ -85,7 +85,7 @@ Resources:
       FunctionName: !Ref LambdaFunctionProd
       Action: lambda:InvokeFunction
       Principal: s3.amazonaws.com
-      SourceArn: !GetAtt S3Bucket.Arn
+      SourceArn: !Ref LambdaCodeBucket
 
   LambdaFunctionBeta:
     Type: AWS::Lambda::Function
