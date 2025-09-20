@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploy Lambda, S3, and other resources for audio pipeline project
+Description: Deploy S3, and other resources for audio pipeline project
 
 # Parameters:
 #   LambdaFunctionNameBeta:
@@ -44,48 +44,48 @@ Resources:
                         Value: audio-inputs/prod/
           - !Ref "AWS::NoValue"
 
-  LambdaExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
+  # LambdaExecutionRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     AssumeRolePolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service: lambda.amazonaws.com
+  #           Action: sts:AssumeRole
 
-  LambdaBasicExecutionPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: LambdaBasicExecution
-      Roles:
-        - !Ref LambdaExecutionRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action:
-              - logs:CreateLogGroup
-              - logs:CreateLogStream
-              - logs:PutLogEvents
-            Resource: "arn:aws:logs:*:*:*"
+  # LambdaBasicExecutionPolicy:
+  #   Type: AWS::IAM::Policy
+  #   Properties:
+  #     PolicyName: LambdaBasicExecution
+  #     Roles:
+  #       - !Ref LambdaExecutionRole
+  #     PolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: Allow
+  #           Action:
+  #             - logs:CreateLogGroup
+  #             - logs:CreateLogStream
+  #             - logs:PutLogEvents
+  #           Resource: "arn:aws:logs:*:*:*"
 
-  LambdaInvokePermissionBeta:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !Ref LambdaFunctionBeta
-      Action: lambda:InvokeFunction
-      Principal: s3.amazonaws.com
-      SourceArn: !GetAtt S3Bucket.Arn
+  # LambdaInvokePermissionBeta:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     FunctionName: !Ref LambdaFunctionBeta
+  #     Action: lambda:InvokeFunction
+  #     Principal: s3.amazonaws.com
+  #     SourceArn: !GetAtt S3Bucket.Arn
 
-  LambdaInvokePermissionProd:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !Ref LambdaFunctionProd
-      Action: lambda:InvokeFunction
-      Principal: s3.amazonaws.com
-      SourceArn: !GetAtt S3Bucket.Arn
+  # LambdaInvokePermissionProd:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     FunctionName: !Ref LambdaFunctionProd
+  #     Action: lambda:InvokeFunction
+  #     Principal: s3.amazonaws.com
+  #     SourceArn: !GetAtt S3Bucket.Arn
 
   # LambdaFunctionBeta:
   #   Type: AWS::Lambda::Function
