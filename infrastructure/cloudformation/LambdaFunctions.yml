@@ -113,11 +113,6 @@ Resources:
             Action: polly:SynthesizeSpeech
             Resource: "*"
 
-          - Sid: PutPollyAudio
-            Effect: Allow
-            Action: s3:PutObject
-            Resource: !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}/${OutputPrefix}*"
-
 Outputs:
   AudioPipelineLambdaBetaArn:
     Value: !GetAtt LambdaFunctionBeta.Arn
