@@ -71,4 +71,4 @@ jobs:
             S3_PATH:   ${{ secrets.S3_PATH_BETA }}
             S3_PREFIX: ${{ secrets.S3_PATH_UPLOADS }}
         run: |
-            aws s3 sync "audio_inputs/" "s3://$S3_BUCKET/${S3_PATH%}/$S3_PREFIX/}/"
+            aws s3 sync "audio_inputs/" "s3://$S3_BUCKET/${S3_PATH%}/$S3_PREFIX/"
