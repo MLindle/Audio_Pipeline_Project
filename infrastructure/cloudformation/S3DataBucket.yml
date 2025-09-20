@@ -28,3 +28,33 @@ Resources:
                 Rules:
                   - Name: prefix
                     Value: prod/audio_inputs/
+
+  S3EventBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3EventBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: TranscribeReadInput
+            Effect: Allow
+            Principal: { Service: transcribe.amazonaws.com }
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+              - s3:ListBucket
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${S3EventBucket}"
+              - !Sub "arn:${AWS::Partition}:s3:::${S3EventBucket}/audio-inputs/*"
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+                
+          - Sid: TranscribeWriteOutput
+            Effect: Allow
+            Principal: { Service: transcribe.amazonaws.com }
+            Action: s3:PutObject
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${S3EventBucket}/audio-outputs/*"
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId

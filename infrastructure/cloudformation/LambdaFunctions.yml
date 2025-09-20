@@ -88,6 +88,36 @@ Resources:
         S3Bucket: !Ref LambdaCodeBucket
         S3Key: !Ref LambdaCodeKey
 
+  AppAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: AudioPipeline-AppAccess
+      Roles: [ !Ref LambdaExecutionRole ]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: Transcribe
+            Effect: Allow
+            Action:
+              - transcribe:StartTranscriptionJob
+              - transcribe:GetTranscriptionJob
+            Resource: "*"
+
+          - Sid: Translate
+            Effect: Allow
+            Action: translate:TranslateText
+            Resource: "*"
+
+          - Sid: Polly
+            Effect: Allow
+            Action: polly:SynthesizeSpeech
+            Resource: "*"
+
+          - Sid: PutPollyAudio
+            Effect: Allow
+            Action: s3:PutObject
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}/${OutputPrefix}*"
+
 Outputs:
   AudioPipelineLambdaBetaArn:
     Value: !GetAtt LambdaFunctionBeta.Arn
