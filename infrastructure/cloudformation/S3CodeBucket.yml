@@ -1,0 +1,117 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy resources for audio pipeline project
+
+Parameters:
+  # LambdaFunctionNameBeta:
+  #   Type: String
+  #   Default: Audio-Pipeline-Lambda-Beta
+  #   Description: Name for the Lambda function
+
+  # LambdaFunctionNameProd:
+  #   Type: String
+  #   Default: Audio-Pipeline-Lambda-Prod
+  #   Description: Name for the Lambda function
+
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 bucket where the Lambda deployment package is stored
+
+  LambdaCodeKey:
+    Type: String
+    Description: S3 key for the Lambda deployment package
+
+Resources:
+
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref LambdaCodeBucket
+
+  # S3Bucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: !Ref LambdaCodeBucket
+  #     NotificationConfiguration:
+  #         - LambdaConfigurations:
+  #             - Event: s3:ObjectCreated:*
+  #               Filter:
+  #                 S3Key:
+  #                   Rules:
+  #                     - Name: prefix
+  #                       Value: audio-inputs/beta/
+  #               Function: !GetAtt LambdaFunctionBeta.Arn
+  #             - Event: s3:ObjectCreated:*
+  #               Function: !GetAtt LambdaFunctionProd.Arn
+  #               Filter:
+  #                 S3Key:
+  #                   Rules:
+  #                     - Name: prefix
+  #                       Value: audio-inputs/prod/
+  #         - !Ref "AWS::NoValue"
+
+  # LambdaExecutionRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     AssumeRolePolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service: lambda.amazonaws.com
+  #           Action: sts:AssumeRole
+
+  # LambdaBasicExecutionPolicy:
+  #   Type: AWS::IAM::Policy
+  #   Properties:
+  #     PolicyName: LambdaBasicExecution
+  #     Roles:
+  #       - !Ref LambdaExecutionRole
+  #     PolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: Allow
+  #           Action:
+  #             - logs:CreateLogGroup
+  #             - logs:CreateLogStream
+  #             - logs:PutLogEvents
+  #           Resource: "arn:aws:logs:*:*:*"
+
+  # LambdaInvokePermissionBeta:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     FunctionName: !Ref LambdaFunctionBeta
+  #     Action: lambda:InvokeFunction
+  #     Principal: s3.amazonaws.com
+  #     SourceArn: !GetAtt S3Bucket.Arn
+
+  # LambdaInvokePermissionProd:
+  #   Type: AWS::Lambda::Permission
+  #   Properties:
+  #     FunctionName: !Ref LambdaFunctionProd
+  #     Action: lambda:InvokeFunction
+  #     Principal: s3.amazonaws.com
+  #     SourceArn: !GetAtt S3Bucket.Arn
+
+  # LambdaFunctionBeta:
+  #   Type: AWS::Lambda::Function
+  #   Properties:
+  #     FunctionName: !Ref LambdaFunctionNameBeta
+  #     Handler: process_audio.lambda_handler
+  #     Role: !GetAtt LambdaExecutionRole.Arn
+  #     Runtime: python3.12
+  #     Timeout: 120
+  #     Code:
+  #       S3Bucket: !Ref LambdaCodeBucket
+  #       S3Key: !Ref LambdaCodeKey
+
+  # LambdaFunctionProd:
+  #   Type: AWS::Lambda::Function
+  #   Properties:
+  #     FunctionName: !Ref LambdaFunctionNameProd
+  #     Handler: process_audio.lambda_handler
+  #     Role: !GetAtt LambdaExecutionRole.Arn
+  #     Runtime: python3.12
+  #     Timeout: 120
+  #     Code:
+  #       S3Bucket: !Ref LambdaCodeBucket
+  #       S3Key: !Ref LambdaCodeKey

@@ -17,20 +17,19 @@ jobs:
 
       - uses: actions/checkout@v5
 
-      - name: Deploy stack
+      - name: Deploy S3 Code Bucket stack
         run: |
           aws cloudformation deploy \
             --stack-name ${{ secrets.CF_STACK_NAME_AUDIO_PIPELINE_1 }} \
-            --template-file infrastructure/cloudformation/template.yml \
+            --template-file infrastructure/cloudformation/S3CodeBucket.yml \
             --capabilities CAPABILITY_NAMED_IAM \
             --parameter-overrides \
-              LambdaFunctionNameBeta=${{ secrets.LAMBDA_NAME_BETA }} \
-              LambdaCodeBucket=${{ secrets.S3_BUCKET }} \
+              LambdaCodeBucket=${{ secrets.S3_CODE_BUCKET_BETA }} \
               LambdaCodeKey=${{ secrets.S3_PATH_BETA }}/function.zip
 
       - name: Package and upload lambda code to S3
         env:
-          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_BUCKET: ${{ secrets.S3_CODE_BUCKET_BETA }}
           S3_PATH:   ${{ secrets.S3_PATH_BETA }}
         run: |
           zip function.zip process_audio.py \
