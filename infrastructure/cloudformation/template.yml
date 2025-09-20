@@ -1,24 +1,24 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Deploy Lambda, S3, and other resources for audio pipeline project
 
-Parameters:
-  LambdaFunctionNameBeta:
-    Type: String
-    Default: Audio-Pipeline-Lambda-Beta
-    Description: Name for the Lambda function
+# Parameters:
+#   LambdaFunctionNameBeta:
+#     Type: String
+#     Default: Audio-Pipeline-Lambda-Beta
+#     Description: Name for the Lambda function
 
-  LambdaFunctionNameProd:
-    Type: String
-    Default: Audio-Pipeline-Lambda-Prod
-    Description: Name for the Lambda function
+#   LambdaFunctionNameProd:
+#     Type: String
+#     Default: Audio-Pipeline-Lambda-Prod
+#     Description: Name for the Lambda function
 
-  LambdaCodeBucket:
-    Type: String
-    Description: S3 bucket where the Lambda deployment package is stored
+#   LambdaCodeBucket:
+#     Type: String
+#     Description: S3 bucket where the Lambda deployment package is stored
 
-  LambdaCodeKey:
-    Type: String
-    Description: S3 key for the Lambda deployment package
+#   LambdaCodeKey:
+#     Type: String
+#     Description: S3 key for the Lambda deployment package
 
 Resources:
 
