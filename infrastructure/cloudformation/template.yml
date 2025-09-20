@@ -33,7 +33,7 @@ Resources:
                   S3Key:
                     Rules:
                       - Name: prefix
-                        Value: rekognition-input/beta/
+                        Value: audio-inputs/beta/
                 Function: !GetAtt LambdaFunctionBeta.Arn
               - Event: s3:ObjectCreated:*
                 Function: !GetAtt LambdaFunctionProd.Arn
@@ -41,7 +41,7 @@ Resources:
                   S3Key:
                     Rules:
                       - Name: prefix
-                        Value: rekognition-input/prod/
+                        Value: audio-inputs/prod/
           - !Ref "AWS::NoValue"
 
   LambdaExecutionRole:
@@ -87,26 +87,26 @@ Resources:
       Principal: s3.amazonaws.com
       SourceArn: !GetAtt S3Bucket.Arn
 
-  LambdaFunctionBeta:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName: !Ref LambdaFunctionNameBeta
-      Handler: process_audio.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Runtime: python3.12
-      Timeout: 120
-      Code:
-        S3Bucket: !Ref LambdaCodeBucket
-        S3Key: !Ref LambdaCodeKey
+  # LambdaFunctionBeta:
+  #   Type: AWS::Lambda::Function
+  #   Properties:
+  #     FunctionName: !Ref LambdaFunctionNameBeta
+  #     Handler: process_audio.lambda_handler
+  #     Role: !GetAtt LambdaExecutionRole.Arn
+  #     Runtime: python3.12
+  #     Timeout: 120
+  #     Code:
+  #       S3Bucket: !Ref LambdaCodeBucket
+  #       S3Key: !Ref LambdaCodeKey
 
-  LambdaFunctionProd:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName: !Ref LambdaFunctionNameProd
-      Handler: analyze_image.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Runtime: python3.12
-      Timeout: 120
-      Code:
-        S3Bucket: !Ref LambdaCodeBucket
-        S3Key: !Ref LambdaCodeKey
+  # LambdaFunctionProd:
+  #   Type: AWS::Lambda::Function
+  #   Properties:
+  #     FunctionName: !Ref LambdaFunctionNameProd
+  #     Handler: process_audio.lambda_handler
+  #     Role: !GetAtt LambdaExecutionRole.Arn
+  #     Runtime: python3.12
+  #     Timeout: 120
+  #     Code:
+  #       S3Bucket: !Ref LambdaCodeBucket
+  #       S3Key: !Ref LambdaCodeKey
