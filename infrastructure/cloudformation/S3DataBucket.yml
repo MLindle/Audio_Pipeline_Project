@@ -16,33 +16,29 @@ Parameters:
     Type: String
     Description: S3 bucket where the Lambda deployment package is stored
 
-  # LambdaCodeKey:
-  #   Type: String
-  #   Description: S3 key for the Lambda deployment package
-
 Resources:
 
-  S3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Ref LambdaCodeBucket
-      NotificationConfiguration:
-          - LambdaConfigurations:
-              - Event: s3:ObjectCreated:*
-                Filter:
-                  S3Key:
-                    Rules:
-                      - Name: prefix
-                        Value: audio-inputs/beta/
-                Function: !ImportValue AudioPipeline-LambdaBetaArn
-              - Event: s3:ObjectCreated:*
-                Function: !ImportValue AudioPipeline-LambdaProdArn
-                Filter:
-                  S3Key:
-                    Rules:
-                      - Name: prefix
-                        Value: audio-inputs/prod/
-          - !Ref "AWS::NoValue"
+S3Bucket:
+  Type: AWS::S3::Bucket
+  Properties:
+    BucketName: !Ref LambdaCodeBucket  
+    NotificationConfiguration:
+      LambdaConfigurations:
+        - Event: "s3:ObjectCreated:*"
+          Function: !ImportValue AudioPipeline-LambdaBetaArn
+          Filter:
+            S3Key:
+              Rules:
+                - Name: prefix
+                  Value: audio-inputs/beta/
+        - Event: "s3:ObjectCreated:*"
+          Function: !ImportValue AudioPipeline-LambdaProdArn
+          Filter:
+            S3Key:
+              Rules:
+                - Name: prefix
+                  Value: audio-inputs/prod/
+
 
   LambdaInvokePermissionBeta:
     Type: AWS::Lambda::Permission
