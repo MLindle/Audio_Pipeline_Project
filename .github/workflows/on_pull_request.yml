@@ -20,7 +20,7 @@ jobs:
       - name: Deploy stack
         run: |
           aws cloudformation deploy \
-            --stack-name ${{ secrets.CF_STACK_NAME }} \
+            --stack-name ${{ secrets.CF_STACK_NAME_AUDIO_PIPELINE_1 }} \
             --template-file infrastructure/cloudformation/template.yml \
             --capabilities CAPABILITY_NAMED_IAM \
             --parameter-overrides \
