@@ -8,26 +8,26 @@ Parameters:
 
 Resources:
 
-S3Bucket:
-  Type: AWS::S3::Bucket
-  Properties:
-    BucketName: !Ref LambdaCodeBucket  
-    NotificationConfiguration:
-      LambdaConfigurations:
-        - Event: "s3:ObjectCreated:*"
-          Function: !ImportValue AudioPipeline-LambdaBetaArn
-          Filter:
-            S3Key:
-              Rules:
-                - Name: prefix
-                  Value: audio-inputs/beta/
-        - Event: "s3:ObjectCreated:*"
-          Function: !ImportValue AudioPipeline-LambdaProdArn
-          Filter:
-            S3Key:
-              Rules:
-                - Name: prefix
-                  Value: audio-inputs/prod/
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref LambdaCodeBucket  
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: "s3:ObjectCreated:*"
+            Function: !ImportValue AudioPipeline-LambdaBetaArn
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: audio-inputs/beta/
+          - Event: "s3:ObjectCreated:*"
+            Function: !ImportValue AudioPipeline-LambdaProdArn
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: prefix
+                    Value: audio-inputs/prod/
 
 
   LambdaInvokePermissionBeta:
