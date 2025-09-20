@@ -20,11 +20,11 @@ Resources:
               S3Key:
                 Rules:
                   - Name: prefix
-                    Value: audio-inputs/beta/
+                    Value: beta/audio-inputs/
           - Event: "s3:ObjectCreated:*"
             Function: !ImportValue AudioPipeline-LambdaProdArn
             Filter:
               S3Key:
                 Rules:
                   - Name: prefix
-                    Value: audio-inputs/prod/
+                    Value: prod/audio-inputs/
