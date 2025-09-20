@@ -32,5 +32,5 @@ jobs:
           S3_BUCKET: ${{ secrets.S3_CODE_BUCKET_BETA }}
           S3_PATH:   ${{ secrets.S3_PATH_BETA }}
         run: |
-          zip function.zip process_audio.py \
+          zip function.zip process_audio.py
           aws s3 cp function.zip s3://$S3_BUCKET/$S3_PATH/function.zip
