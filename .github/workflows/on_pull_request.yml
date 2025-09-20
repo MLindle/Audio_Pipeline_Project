@@ -23,10 +23,10 @@ jobs:
             --stack-name ${{ secrets.CF_STACK_NAME_AUDIO_PIPELINE_1 }} \
             --template-file infrastructure/cloudformation/template.yml \
             --capabilities CAPABILITY_NAMED_IAM \
-            # --parameter-overrides \
-            #   LambdaFunctionNameBeta=${{ secrets.LAMBDA_NAME_BETA }} \
-            #   LambdaCodeBucket=${{ secrets.S3_BUCKET }} \
-            #   LambdaCodeKey=${{ secrets.S3_PATH_BETA }}/function.zip
+            --parameter-overrides \
+              LambdaFunctionNameBeta=${{ secrets.LAMBDA_NAME_BETA }} \
+              LambdaCodeBucket=${{ secrets.S3_BUCKET }} \
+              LambdaCodeKey=${{ secrets.S3_PATH_BETA }}/function.zip
 
       - name: Package and upload lambda code to S3
         env:
