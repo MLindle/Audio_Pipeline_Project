@@ -32,7 +32,7 @@ Resources:
   S3EventBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref S3EventBucket
+      Bucket: !Ref LambdaCodeBucket
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -44,17 +44,17 @@ Resources:
               - s3:GetObjectVersion
               - s3:ListBucket
             Resource:
-              - !Sub "arn:${AWS::Partition}:s3:::${S3EventBucket}"
-              - !Sub "arn:${AWS::Partition}:s3:::${S3EventBucket}/audio-inputs/*"
+              - !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}"
+              - !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}/audio-inputs/*"
             Condition:
               StringEquals:
                 aws:SourceAccount: !Ref AWS::AccountId
-                
+
           - Sid: TranscribeWriteOutput
             Effect: Allow
             Principal: { Service: transcribe.amazonaws.com }
             Action: s3:PutObject
-            Resource: !Sub "arn:${AWS::Partition}:s3:::${S3EventBucket}/audio-outputs/*"
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}/audio-outputs/*"
             Condition:
               StringEquals:
                 aws:SourceAccount: !Ref AWS::AccountId
