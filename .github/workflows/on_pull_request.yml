@@ -1,0 +1,76 @@
+name: Upload and deploy BETA
+
+on:
+  pull_request:
+    branches: ['main']
+
+jobs:
+  deploy_and_upload_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:      ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key:  ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-region:             ${{ secrets.AWS_REGION }}
+
+      - uses: actions/checkout@v5
+
+      - name: Deploy S3 Code Bucket stack
+        run: |
+          aws cloudformation deploy \
+            --stack-name ${{ secrets.CF_STACK_NAME_AUDIO_PIPELINE_1 }} \
+            --template-file infrastructure/cloudformation/S3CodeBucket.yml \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides \
+              LambdaCodeBucket=${{ secrets.S3_CODE_BUCKET_BETA }} \
+              LambdaCodeKey=${{ secrets.S3_PATH_BETA }}/function.zip
+
+      - name: Package and upload lambda code to S3
+        env:
+          S3_BUCKET: ${{ secrets.S3_CODE_BUCKET_BETA }}
+          S3_PATH:   ${{ secrets.S3_PATH_BETA }}
+        run: |
+          zip function.zip process_audio.py
+          aws s3 cp function.zip s3://$S3_BUCKET/$S3_PATH/function.zip
+
+      - name: Deploy Lambda Function stack
+        run: |
+            aws cloudformation deploy \
+            --stack-name ${{ secrets.CF_STACK_NAME_AUDIO_PIPELINE_2 }} \
+            --template-file infrastructure/cloudformation/LambdaFunctions.yml \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides \
+                LambdaCodeBucket=${{ secrets.S3_CODE_BUCKET_BETA }} \
+                LambdaCodeKey=${{ secrets.S3_PATH_BETA }}/function.zip \
+                LambdaFunctionNameProd=${{ secrets.LAMBDA_NAME_PROD }} \
+                LambdaFunctionNameBeta=${{ secrets.LAMBDA_NAME_BETA }} \
+                EventBucketName=${{ secrets.S3_BUCKET_BETA }} \
+                StageName=beta
+
+      - name: Deploy S3 Data Bucket stack
+        run: |
+            aws cloudformation deploy \
+            --stack-name ${{ secrets.CF_STACK_NAME_AUDIO_PIPELINE_3 }} \
+            --template-file infrastructure/cloudformation/S3DataBucket.yml \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --parameter-overrides \
+                LambdaCodeBucket=${{ secrets.S3_BUCKET_BETA }}
+
+      - name: AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+            aws-access-key-id:      ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key:  ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+            aws-region:             ${{ secrets.AWS_REGION }}
+
+      - uses: actions/checkout@v5
+
+      - name: Upload audio file to S3 to trigger Lambda
+        env:
+            S3_BUCKET: ${{ secrets.S3_BUCKET_BETA }}
+            S3_PATH:   ${{ secrets.S3_PATH_BETA }}
+            S3_PREFIX: ${{ secrets.S3_PATH_UPLOADS }}
+        run: |
+            aws s3 sync "audio_inputs/" "s3://$S3_BUCKET/${S3_PATH%}/$S3_PREFIX/"

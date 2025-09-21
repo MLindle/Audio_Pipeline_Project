@@ -1,0 +1,146 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy resources for audio pipeline project
+
+Parameters:
+  StageName:
+    Type: String
+    Default: "audio-outputs/"
+
+  EventBucketName:
+    Type: String
+    Description: Name of the data/event bucket (where audio is uploaded)
+
+  LambdaFunctionNameBeta:
+    Type: String
+    Default: Audio-Pipeline-Lambda-Beta
+    Description: Name for the Lambda function
+
+  LambdaFunctionNameProd:
+    Type: String
+    Default: Audio-Pipeline-Lambda-Prod
+    Description: Name for the Lambda function
+
+  LambdaCodeBucket:
+    Type: String
+    Description: S3 bucket where the Lambda deployment package is stored
+
+  LambdaCodeKey:
+    Type: String
+    Description: S3 key for the Lambda deployment package
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+
+  LambdaBasicExecutionPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: LambdaBasicExecution
+      Roles:
+        - !Ref LambdaExecutionRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: "arn:aws:logs:*:*:*"
+
+  LambdaInvokePermissionBeta:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaFunctionBeta
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
+
+  LambdaInvokePermissionProd:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaFunctionProd
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
+
+  LambdaFunctionBeta:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaFunctionNameBeta
+      Handler: process_audio.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.12
+      Timeout: 120
+      Code:
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: !Ref LambdaCodeKey
+
+  LambdaFunctionProd:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaFunctionNameProd
+      Handler: process_audio.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.12
+      Timeout: 120
+      Code:
+        S3Bucket: !Ref LambdaCodeBucket
+        S3Key: !Ref LambdaCodeKey
+
+  AppAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: AudioPipeline-AppAccess
+      Roles: [ !Ref LambdaExecutionRole ]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: Transcribe
+            Effect: Allow
+            Action:
+              - transcribe:StartTranscriptionJob
+              - transcribe:GetTranscriptionJob
+            Resource: "*"
+
+          - Sid: Translate
+            Effect: Allow
+            Action: translate:TranslateText
+            Resource: "*"
+
+          - Sid: Polly
+            Effect: Allow
+            Action: polly:SynthesizeSpeech
+            Resource: "*"
+
+          - Sid: DebugGetBucketLocation
+            Effect: Allow
+            Action: s3:GetBucketLocation
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}"
+
+          - Sid: DebugHeadObject
+            Effect: Allow
+            Action: s3:GetObject
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}/*"
+
+          - Sid: PutOutputs
+            Effect: Allow
+            Action: s3:PutObject
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}/${StageName}*"
+
+
+Outputs:
+  AudioPipelineLambdaBetaArn:
+    Value: !GetAtt LambdaFunctionBeta.Arn
+    Export: { Name: AudioPipeline-LambdaBetaArn }
+  AudioPipelineLambdaProdArn:
+    Value: !GetAtt LambdaFunctionProd.Arn
+    Export: { Name: AudioPipeline-LambdaProdArn }
