@@ -25,7 +25,7 @@ jobs:
             --capabilities CAPABILITY_NAMED_IAM \
             --parameter-overrides \
                 LambdaCodeBucket=${{ secrets.S3_CODE_BUCKET_BETA }} \
-                LambdaCodeKey=${{ secrets.S3_PATH_PROD }}/function.zip \
+                LambdaCodeKey=${{ secrets.S3_PATH_BETA }}/function.zip \
                 LambdaFunctionNameProd=${{ secrets.LAMBDA_NAME_PROD }} \
                 LambdaFunctionNameBeta=${{ secrets.LAMBDA_NAME_BETA }} \
                 EventBucketName=${{ secrets.S3_BUCKET_BETA }} \
