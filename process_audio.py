@@ -11,7 +11,7 @@ def lambda_handler(event, context):
     polly      = boto3.client("polly")
     s3         = boto3.client("s3")
 
-    src_lang_full = os.getenv("SOURCE_LANG", "en-US")   
+    src_lang_full = os.getenv("SOURCE_LANG", "en-US")    
     src_lang_tx   = src_lang_full.split("-")[0] or "en"  
     tgt_lang      = os.getenv("TARGET_LANG", "es")
     voice_id      = os.getenv("POLLY_VOICE", "Lupe")
