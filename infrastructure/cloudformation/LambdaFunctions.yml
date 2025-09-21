@@ -2,6 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Deploy resources for audio pipeline project
 
 Parameters:
+  OutputPrefix:
+    Type: String
+    Default: "audio-outputs/"
+
   EventBucketName:
     Type: String
     Description: Name of the data/event bucket (where audio is uploaded)
@@ -126,6 +130,11 @@ Resources:
             Effect: Allow
             Action: s3:GetObject
             Resource: !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}/*"
+
+          - Sid: PutOutputs
+            Effect: Allow
+            Action: s3:PutObject
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}/${OutputPrefix}*"
 
 
 Outputs:

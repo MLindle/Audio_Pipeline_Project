@@ -46,7 +46,8 @@ jobs:
                 LambdaCodeKey=${{ secrets.S3_PATH_BETA }}/function.zip \
                 LambdaFunctionNameProd=${{ secrets.LAMBDA_NAME_PROD }} \
                 LambdaFunctionNameBeta=${{ secrets.LAMBDA_NAME_BETA }} \
-                EventBucketName=${{ secrets.S3_BUCKET_BETA }} 
+                EventBucketName=${{ secrets.S3_BUCKET_BETA }} \
+                OutputPrefix=audio-outputs/
 
       - name: Deploy S3 Data Bucket stack
         run: |
