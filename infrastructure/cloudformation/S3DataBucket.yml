@@ -4,14 +4,13 @@ Description: Deploy resources for audio pipeline project
 Parameters:
   LambdaCodeBucket:
     Type: String
-    Description: S3 bucket where the Lambda deployment package is stored
 
 Resources:
 
   S3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Ref LambdaCodeBucket  
+      BucketName: !Ref LambdaCodeBucket
       NotificationConfiguration:
         LambdaConfigurations:
           - Event: "s3:ObjectCreated:*"
@@ -32,29 +31,18 @@ Resources:
   S3EventBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref LambdaCodeBucket
+      Bucket: !Ref S3Bucket
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Sid: TranscribeReadInput
+          - Sid: TranscribeReadAll
             Effect: Allow
             Principal: { Service: transcribe.amazonaws.com }
             Action:
               - s3:GetObject
               - s3:GetObjectVersion
-              - s3:ListBucket
             Resource:
-              - !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}"
-              - !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}/beta/audio_inputs/*"
-            Condition:
-              StringEquals:
-                aws:SourceAccount: !Ref AWS::AccountId
-
-          - Sid: TranscribeWriteOutput
-            Effect: Allow
-            Principal: { Service: transcribe.amazonaws.com }
-            Action: s3:PutObject
-            Resource: !Sub "arn:${AWS::Partition}:s3:::${LambdaCodeBucket}/beta/audio_inputs/*"
+              - !Sub "arn:${AWS::Partition}:s3:::${S3Bucket}/*"
             Condition:
               StringEquals:
                 aws:SourceAccount: !Ref AWS::AccountId
