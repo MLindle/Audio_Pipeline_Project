@@ -15,7 +15,13 @@ def lambda_handler(event, context):
     src_lang_tx   = src_lang_full.split("-")[0] or "en"  
     tgt_lang      = os.getenv("TARGET_LANG", "es")
     voice_id      = os.getenv("POLLY_VOICE", "Lupe")
-    out_prefix    = (os.getenv("OUTPUT_PREFIX", "audio-outputs/").rstrip("/") + "/")
+    
+    stage = (os.getenv("STAGE") or os.getenv("STAGE_PREFIX") or "beta").strip().lower()
+    if stage not in ("beta", "prod"):
+        stage = "beta"
+    folder = (os.getenv("OUTPUT_FOLDER", "audio-outputs").strip("/")) or "audio-outputs"
+    out_prefix = f"{stage}/{folder}/"
+    logger.info("Resolved out_prefix: %s (stage=%s, folder=%s)", out_prefix, stage, folder)
 
     def put_obj(bucket: str, key: str, body: bytes, content_type: str):
         s3.put_object(Bucket=bucket, Key=key, Body=body, ContentType=content_type)

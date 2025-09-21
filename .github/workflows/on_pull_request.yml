@@ -47,7 +47,7 @@ jobs:
                 LambdaFunctionNameProd=${{ secrets.LAMBDA_NAME_PROD }} \
                 LambdaFunctionNameBeta=${{ secrets.LAMBDA_NAME_BETA }} \
                 EventBucketName=${{ secrets.S3_BUCKET_BETA }} \
-                OutputPrefix=audio-outputs/
+                StageName=beta
 
       - name: Deploy S3 Data Bucket stack
         run: |
