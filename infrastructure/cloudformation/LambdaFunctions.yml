@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Deploy resources for audio pipeline project
 
 Parameters:
-  OutputPrefix:
+  StageName:
     Type: String
     Default: "audio-outputs/"
 
