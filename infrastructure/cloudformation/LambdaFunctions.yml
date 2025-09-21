@@ -2,6 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Deploy resources for audio pipeline project
 
 Parameters:
+  EventBucketName:
+    Type: String
+    Description: Name of the data/event bucket (where audio is uploaded)
+
   LambdaFunctionNameBeta:
     Type: String
     Default: Audio-Pipeline-Lambda-Beta
@@ -112,6 +116,17 @@ Resources:
             Effect: Allow
             Action: polly:SynthesizeSpeech
             Resource: "*"
+
+          - Sid: DebugGetBucketLocation
+            Effect: Allow
+            Action: s3:GetBucketLocation
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}"
+
+          - Sid: DebugHeadObject
+            Effect: Allow
+            Action: s3:GetObject
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}/*"
+
 
 Outputs:
   AudioPipelineLambdaBetaArn:
