@@ -31,6 +31,27 @@ def lambda_handler(event, context):
             job  = f"tx-{base}-{context.aws_request_id[:8]}"
 
             logger.info("Start Transcribe job=%s for s3://%s/%s fmt=%s", job, b, k, fmt)
+
+            uri = f"s3://{b}/{k}"
+            
+            logger.info("Transcribe input (bucket/key): %s %s  -> %s", b, k, uri)
+
+            # Log the Lambda/Transcribe region and bucket region
+            import boto3
+            logger.info("Lambda region=%s", boto3.session.Session().region_name)
+            try:
+                loc = s3.get_bucket_location(Bucket=b)["LocationConstraint"] or "us-east-1"
+                logger.info("Bucket region=%s", loc)
+            except Exception as e:
+                logger.warning("Could not get bucket location: %s", e)
+
+            # Verify the object actually exists (and Lambda can see it)
+            try:
+                s3.head_object(Bucket=b, Key=k)
+            except Exception as e:
+                logger.error("Object missing or Lambda can't read it: %s (%s)", uri, e)
+                return {"ok": False}
+
             transcribe.start_transcription_job(
                 TranscriptionJobName=job,
                 LanguageCode=src_lang,
