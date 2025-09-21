@@ -103,3 +103,5 @@ def lambda_handler(event, context):
             logger.exception("Unhandled error processing record")
 
     return {"ok": True, "processed": processed}
+
+# Adding for test.
