@@ -11,10 +11,15 @@ def lambda_handler(event, context):
     polly      = boto3.client("polly")
     s3         = boto3.client("s3")
 
-    src_lang   = os.getenv("SOURCE_LANG", "en-US")
-    tgt_lang   = os.getenv("TARGET_LANG", "es")
-    voice_id   = os.getenv("POLLY_VOICE", "Lupe")
-    out_prefix = (os.getenv("OUTPUT_PREFIX", "audio-outputs/").rstrip("/") + "/")
+    src_lang_full = os.getenv("SOURCE_LANG", "en-US")   
+    src_lang_tx   = src_lang_full.split("-")[0] or "en"  
+    tgt_lang      = os.getenv("TARGET_LANG", "es")
+    voice_id      = os.getenv("POLLY_VOICE", "Lupe")
+    out_prefix    = (os.getenv("OUTPUT_PREFIX", "audio-outputs/").rstrip("/") + "/")
+
+    def put_obj(bucket: str, key: str, body: bytes, content_type: str):
+        s3.put_object(Bucket=bucket, Key=key, Body=body, ContentType=content_type)
+        logger.info("Wrote s3://%s/%s (%s bytes, %s)", bucket, key, len(body), content_type)
 
     records = event.get("Records") or []
     if not records:
@@ -31,32 +36,22 @@ def lambda_handler(event, context):
             job  = f"tx-{base}-{context.aws_request_id[:8]}"
 
             logger.info("Start Transcribe job=%s for s3://%s/%s fmt=%s", job, b, k, fmt)
+            uri_in = f"s3://{b}/{k}"
 
-            uri = f"s3://{b}/{k}"
-            
-            logger.info("Transcribe input (bucket/key): %s %s  -> %s", b, k, uri)
-
-            # Log the Lambda/Transcribe region and bucket region
-            import boto3
-            logger.info("Lambda region=%s", boto3.session.Session().region_name)
             try:
+                logger.info("Lambda region=%s", boto3.session.Session().region_name)
                 loc = s3.get_bucket_location(Bucket=b)["LocationConstraint"] or "us-east-1"
                 logger.info("Bucket region=%s", loc)
             except Exception as e:
                 logger.warning("Could not get bucket location: %s", e)
 
-            # Verify the object actually exists (and Lambda can see it)
-            try:
-                s3.head_object(Bucket=b, Key=k)
-            except Exception as e:
-                logger.error("Object missing or Lambda can't read it: %s (%s)", uri, e)
-                return {"ok": False}
+            s3.head_object(Bucket=b, Key=k)
 
             transcribe.start_transcription_job(
                 TranscriptionJobName=job,
-                LanguageCode=src_lang,
+                LanguageCode=src_lang_full,
                 MediaFormat=fmt,
-                Media={"MediaFileUri": f"s3://{b}/{k}"},
+                Media={"MediaFileUri": uri_in},
             )
             while True:
                 tj = transcribe.get_transcription_job(TranscriptionJobName=job)["TranscriptionJob"]
@@ -69,25 +64,36 @@ def lambda_handler(event, context):
                 logger.error("Transcribe failed for %s: %s", k, tj.get("FailureReason"))
                 continue
 
-            uri = tj["Transcript"]["TranscriptFileUri"]
-            logger.debug("Transcript URI: %s", uri)
+            transcript_uri = tj["Transcript"]["TranscriptFileUri"]
+            logger.debug("Transcript URI: %s", transcript_uri)
             try:
-                body = urllib.request.urlopen(uri, timeout=10).read().decode("utf-8")
+                transcript_body_bytes = urllib.request.urlopen(transcript_uri, timeout=10).read()
+                transcript_json = json.loads(transcript_body_bytes.decode("utf-8"))
             except Exception:
                 logger.exception("Fetching transcript failed (check VPC/NAT or bucket perms).")
                 continue
-            text = json.loads(body)["results"]["transcripts"][0]["transcript"]
+
+            text = transcript_json["results"]["transcripts"][0]["transcript"]
             logger.info("Transcript length=%d chars", len(text))
 
-            ttxt  = translate.translate_text(Text=text, SourceLanguageCode="en", TargetLanguageCode=tgt_lang)["TranslatedText"]
+            transcript_json_key = f"{out_prefix}{base}-transcript.json"
+            transcript_txt_key  = f"{out_prefix}{base}-{src_lang_full}-transcript.txt"
+            put_obj(b, transcript_json_key, json.dumps(transcript_json).encode("utf-8"), "application/json")
+            put_obj(b, transcript_txt_key,  (text + "\n").encode("utf-8"),               "text/plain; charset=utf-8")
+
+            ttxt = translate.translate_text(Text=text, SourceLanguageCode=src_lang_tx, TargetLanguageCode=tgt_lang)["TranslatedText"]
             logger.info("Translated to %s length=%d chars", tgt_lang, len(ttxt))
 
-            audio = polly.synthesize_speech(Text=ttxt, OutputFormat="mp3", VoiceId=voice_id)["AudioStream"].read()
-            out_key = f"{out_prefix}{base}-{tgt_lang}.mp3"
-            s3.put_object(Bucket=b, Key=out_key, Body=audio, ContentType="audio/mpeg")
-            logger.info("Wrote MP3 to s3://%s/%s", b, out_key)
+            translated_txt_key = f"{out_prefix}{base}-translated-{tgt_lang}.txt"
+            put_obj(b, translated_txt_key, (ttxt + "\n").encode("utf-8"), "text/plain; charset=utf-8")
+
+            audio_stream = polly.synthesize_speech(Text=ttxt, OutputFormat="mp3", VoiceId=voice_id)["AudioStream"].read()
+            mp3_key = f"{out_prefix}{base}-{tgt_lang}.mp3"
+            put_obj(b, mp3_key, audio_stream, "audio/mpeg")
 
             processed += 1
+
         except Exception:
             logger.exception("Unhandled error processing record")
+
     return {"ok": True, "processed": processed}
