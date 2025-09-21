@@ -134,7 +134,7 @@ Resources:
           - Sid: PutOutputs
             Effect: Allow
             Action: s3:PutObject
-            Resource: !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}/${OutputPrefix}*"
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}/${StageName}*"
 
 
 Outputs:
