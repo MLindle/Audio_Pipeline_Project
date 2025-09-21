@@ -83,6 +83,14 @@ Resources:
       Code:
         S3Bucket: !Ref LambdaCodeBucket
         S3Key: !Ref LambdaCodeKey
+      Environment:
+        Variables:
+          STAGE: beta
+          OUTPUT_FOLDER: audio-outputs
+          SOURCE_LANG: en-US
+          TARGET_LANG: es
+          POLLY_VOICE: Lupe
+          LOG_LEVEL: INFO
 
   LambdaFunctionProd:
     Type: AWS::Lambda::Function
@@ -95,6 +103,15 @@ Resources:
       Code:
         S3Bucket: !Ref LambdaCodeBucket
         S3Key: !Ref LambdaCodeKey
+      Environment:
+        Variables:
+          STAGE: prod
+          OUTPUT_FOLDER: audio-outputs
+          SOURCE_LANG: en-US
+          TARGET_LANG: es
+          POLLY_VOICE: Lupe
+          LOG_LEVEL: INFO
+
 
   AppAccessPolicy:
     Type: AWS::IAM::Policy
@@ -133,8 +150,11 @@ Resources:
 
           - Sid: PutOutputs
             Effect: Allow
-            Action: s3:PutObject
-            Resource: !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}/${StageName}*"
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}/beta/*"
+              - !Sub "arn:${AWS::Partition}:s3:::${EventBucketName}/prod/*"
 
 
 Outputs:
